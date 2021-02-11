@@ -15,8 +15,10 @@ spec:
     type: {{ .Values.updateStrategyType }}    
   template:
     metadata:
-    {{- with .Values.podAnnotations }}
       annotations:
+        checksum/secureconfig: {{ include (print $.Template.BasePath "/secureconfig.yaml") . | sha256sum }}
+        checksum/geopipsecrets: {{ include (print $.Template.BasePath "/geoipsecrets.yaml") . | sha256sum }}
+    {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
     {{- end }}
       labels:
@@ -89,7 +91,11 @@ spec:
             {{- include "graylog.environment" . | nindent 12 }}
           {{- with .Values.env }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}          
+          {{- end }}
+          {{- if .Values.customLivenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.customLivenessProbe | nindent 12 }}
+          {{- else }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
             httpGet:
@@ -106,6 +112,11 @@ spec:
             periodSeconds: {{ .periodSeconds }}
             {{- end }}
           {{- end }}
+          {{- end }}
+          {{- if .Values.customReadinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.customReadinessProbe | nindent 12 }}
+          {{- else }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
@@ -122,6 +133,7 @@ spec:
             periodSeconds: {{ .periodSeconds }}
             {{- end }}
           {{- end }}
+          {{- end }}
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -137,6 +149,8 @@ spec:
               name: geocity
             - mountPath: /tmp
               name: tmp
+            - mountPath: /usr/share/graylog/plugins-merged
+              name: plugins-merged
             - mountPath: /usr/share/graylog/data
               name: graylog-volume
       {{- with .Values.nodeSelector }}
@@ -156,6 +170,8 @@ spec:
           emptyDir: {}
         - name: geocity
           emptyDir: {}
+        - name: plugins-merged
+          emptyDir: {}
         - name: scripts
           configMap:
             name: {{ include "graylog.fullname" . }}-scripts
@@ -172,8 +188,6 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: graylog-volume
-        labels:
-          {{- include "graylog.labels" . | nindent 10 }}
       spec:
         {{- with .Values.storage.accessModes }}
         accessModes:

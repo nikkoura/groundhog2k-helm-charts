@@ -1,6 +1,6 @@
 # Ghost
 
-![Version: 0.2.10](https://img.shields.io/badge/Version-0.2.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.40.5](https://img.shields.io/badge/AppVersion-3.40.5-informational?style=flat-square)
+![Version: 0.2.16](https://img.shields.io/badge/Version-0.2.16-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.41.4](https://img.shields.io/badge/AppVersion-3.41.4-informational?style=flat-square)
 
 A Helm chart for Ghost blog on Kubernetes
 
@@ -43,7 +43,7 @@ $ helm uninstall my-release
 
 | Repository | Name | Version |
 |------------|------|---------|
-| @groundhog2k | mariadb | 0.2.5 |
+| @groundhog2k | mariadb | 0.2.9 |
 
 ## Common parameters
 
@@ -60,8 +60,11 @@ $ helm uninstall my-release
 | image.repository | string | `"ghost"` | Image name |
 | image.tag | string | `""` | Image tag |
 | imagePullSecrets | list | `[]` | Image pull secrets |
+| strategy | object | `{}` | Pod deployment strategy |
 | livenessProbe | object | `see values.yaml` | Liveness probe configuration |
 | readinessProbe | object | `see values.yaml` | Readiness probe configuration |
+| customLivenessProbe | object | `{}` | Custom liveness probe (overwrites default liveness probe configuration) |
+| customReadinessProbe | object | `{}` | Custom readiness probe (overwrites default readiness probe configuration) |
 | resources | object | `{}` | Resource limits and requests |
 | nodeSelector | object | `{}` | Deployment node selector |
 | podAnnotations | object | `{}` | Additional pod annotations |
